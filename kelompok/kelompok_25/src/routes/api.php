@@ -19,6 +19,14 @@ $router->post('/api/suppliers', 'api/SupplierApiController@store');
 $router->post('/api/suppliers/{id}', 'api/SupplierApiController@update');
 $router->post('/api/suppliers/{id}/delete', 'api/SupplierApiController@destroy');
 
+// Category API routes
+$router->get('/api/categories', 'api/CategoryApiController@index');
+$router->get('/api/categories/search', 'api/CategoryApiController@search');
+$router->get('/api/categories/{id}', 'api/CategoryApiController@show');
+$router->post('/api/categories', 'api/CategoryApiController@store');
+$router->post('/api/categories/{id}', 'api/CategoryApiController@update');
+$router->post('/api/categories/{id}/delete', 'api/CategoryApiController@destroy');
+
 // Materials API routes
 $router->get('/api/materials', function() {
     AuthMiddleware::check();
