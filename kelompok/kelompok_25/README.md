@@ -7,9 +7,9 @@
 |----|-------|--------|----------|------------|
 | 1 | ✅ Supplier Management | **DONE** | P0 | ⭐⭐ |
 | 2 | ✅ Category Management | **DONE** | P0  | ⭐ |
-| 3 | ⬜ Material Management | TODO | P0 | ⭐⭐⭐⭐ |
-| 4 | ⬜ Material Images | TODO | P1 | ⭐⭐⭐ |
-| 5 | ⬜ Stock In (Barang Masuk) | TODO | P0 | ⭐⭐⭐⭐ |
+| 3 | ✅ Material Management | **DONE** | P0 | ⭐⭐⭐⭐ |
+| 4 | ✅ Material Images | **DONE** | P1 | ⭐⭐⭐ |
+| 5 | ✅ Stock In (Barang Masuk) | **DONE** | P0 | ⭐⭐⭐⭐ |
 | 6 | ⬜ Stock Out (Barang Keluar) | TODO | P0 | ⭐⭐⭐⭐ |
 | 7 | ⬜ Stock Adjustment | TODO | P1 | ⭐⭐⭐ |
 | 8 | ⬜ Reports & Analytics | TODO | P1 | ⭐⭐⭐⭐ |
