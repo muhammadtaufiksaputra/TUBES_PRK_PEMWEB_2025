@@ -27,48 +27,44 @@ $router->post('/api/categories', 'api/CategoryApiController@store');
 $router->post('/api/categories/{id}', 'api/CategoryApiController@update');
 $router->post('/api/categories/{id}/delete', 'api/CategoryApiController@destroy');
 
-// Materials API routes
-$router->get('/api/materials', function() {
+// Material API routes
+$router->get('/api/materials', 'api/MaterialApiController@index');
+$router->get('/api/materials/search', 'api/MaterialApiController@search');
+$router->get('/api/materials/low-stock', 'api/MaterialApiController@lowStock');
+$router->get('/api/materials/out-of-stock', 'api/MaterialApiController@outOfStock');
+$router->get('/api/materials/stats', 'api/MaterialApiController@stats');
+$router->get('/api/materials/category/{categoryId}', 'api/MaterialApiController@byCategory');
+$router->get('/api/materials/supplier/{supplierId}', 'api/MaterialApiController@bySupplier');
+$router->get('/api/materials/{id}', 'api/MaterialApiController@show');
+$router->post('/api/materials', 'api/MaterialApiController@store');
+$router->post('/api/materials/{id}', 'api/MaterialApiController@update');
+$router->post('/api/materials/{id}/delete', 'api/MaterialApiController@destroy');
+
+// Material Images API routes
+$router->get('/api/materials/{materialId}/images', 'api/MaterialImageApiController@index');
+$router->post('/api/materials/{materialId}/images', 'api/MaterialImageApiController@upload');
+$router->post('/api/materials/{materialId}/images/{id}/primary', 'api/MaterialImageApiController@setPrimary');
+$router->post('/api/materials/{materialId}/images/{id}/delete', 'api/MaterialImageApiController@delete');
+
+// Stock In API routes
+$router->get('/api/stock-in', 'api/StockInApiController@index');
+$router->get('/api/stock-in/today', 'api/StockInApiController@today');
+$router->get('/api/stock-in/stats', 'api/StockInApiController@stats');
+$router->get('/api/stock-in/top-materials', 'api/StockInApiController@topMaterials');
+$router->get('/api/stock-in/top-suppliers', 'api/StockInApiController@topSuppliers');
+$router->get('/api/stock-in/monthly/{year}', 'api/StockInApiController@monthly');
+$router->get('/api/stock-in/{id}', 'api/StockInApiController@show');
+$router->post('/api/stock-in', 'api/StockInApiController@store');
+$router->post('/api/stock-in/{id}', 'api/StockInApiController@update');
+$router->post('/api/stock-in/{id}/delete', 'api/StockInApiController@destroy');
+
+// Stock Out API routes (placeholder)
+$router->get('/api/stock-out', function() {
     AuthMiddleware::check();
-    Response::success('Materials API endpoint', []);
+    Response::success('Stock out endpoint', []);
 });
 
-$router->get('/api/materials/{id}', function($id) {
-    AuthMiddleware::check();
-    Response::success('Material detail', ['id' => $id]);
-});
-
-$router->post('/api/materials', function() {
-    AuthMiddleware::check();
-    RoleMiddleware::staff();
-    Response::success('Create material endpoint', []);
-});
-
-$router->post('/api/materials/{id}', function($id) {
-    AuthMiddleware::check();
-    RoleMiddleware::staff();
-    Response::success('Update material', ['id' => $id]);
-});
-
-$router->post('/api/materials/{id}/delete', function($id) {
-    AuthMiddleware::check();
-    RoleMiddleware::manager();
-    Response::success('Delete material', ['id' => $id]);
-});
-
-// Stock API routes
-$router->get('/api/stock', function() {
-    AuthMiddleware::check();
-    Response::success('Stock API endpoint', []);
-});
-
-$router->post('/api/stock/in', function() {
-    AuthMiddleware::check();
-    RoleMiddleware::staff();
-    Response::success('Stock in endpoint', []);
-});
-
-$router->post('/api/stock/out', function() {
+$router->post('/api/stock-out', function() {
     AuthMiddleware::check();
     RoleMiddleware::staff();
     Response::success('Stock out endpoint', []);
