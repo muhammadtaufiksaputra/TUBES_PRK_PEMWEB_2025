@@ -78,4 +78,14 @@ class Material extends Model {
         $stmt = $this->query($sql);
         return $stmt->fetchAll();
     }
+
+    public function getAll() {
+        $sql = "SELECT * FROM {$this->table} WHERE is_active = 1 ORDER BY name ASC";
+        return $this->query($sql)->fetchAll();
+    }
+
+    public function findById($id) {
+        $sql = "SELECT * FROM {$this->table} WHERE id = ? LIMIT 1";
+        return $this->query($sql, [$id])->fetch();
+    }
 }
