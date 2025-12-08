@@ -76,6 +76,14 @@ $router->get('/api/reports/stock', function() {
     Response::success('Stock report endpoint', []);
 });
 
+$router->get('/api/transactions/trend', function() {
+    AuthMiddleware::check();
+    require_once ROOT_PATH . '/models/Transaction.php';
+    require_once ROOT_PATH . '/controllers/web/TransactionController.php';
+    $controller = new TransactionController();
+    $controller->getTrendData();
+});
+
 $router->get('/api/reports/transactions', function() {
     AuthMiddleware::check();
     Response::success('Transactions report endpoint', []);

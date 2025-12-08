@@ -35,17 +35,17 @@ class PageController extends Controller
 
     public function categories()
     {
-        $this->renderPlaceholder('Data Kategori', 'Pengaturan kategori bahan baku ditampilkan di sini.');
+        $this->view('categories/index', ['title' => 'Data Kategori']);
     }
 
     public function stockIn()
     {
-        $this->renderPlaceholder('Stok Masuk', 'Catat penerimaan bahan baku pada halaman ini.');
+        $this->view('stock-in/index', ['title' => 'Stok Masuk']);
     }
 
     public function stockOut()
     {
-        $this->renderPlaceholder('Stok Keluar', 'Pencatatan penggunaan bahan bakal tersedia di sini.');
+        $this->view('stock-out/index', ['title' => 'Stok Keluar']);
     }
 
     public function stockAdjustments()
