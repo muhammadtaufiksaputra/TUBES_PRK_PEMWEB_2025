@@ -54,6 +54,7 @@ function renderSidebarIcon($icon)
         'warning' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M4.93 19h14.14a2 2 0 001.73-3l-7.07-12a2 2 0 00-3.46 0l-7.07 12a2 2 0 001.73 3z" />',
         'shield' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />',
         'user' => '<path stroke-linecap="round" stroke-linejoin="round" d="M16 14a4 4 0 10-8 0m8 0v4H8v-4m8 0H8" />',
+        'logout' => '<path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />',
     ];
 
     return $icons[$icon] ?? $icons['document'];
@@ -87,7 +88,16 @@ function renderSidebarIcon($icon)
     </nav>
 
     <div class="px-6 py-5 border-t border-gray-200">
-        <p class="text-xs text-gray-400">Versi 1.0.0</p>
-        <p class="text-sm font-medium text-gray-600">PT Inventaris Sejahtera</p>
+        <form action="<?= url('/logout') ?>" method="POST" class="w-full" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
+            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+            <button type="submit" class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 transition">
+                <span class="flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 text-gray-500 group-hover:bg-red-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </span>
+                Logout
+            </button>
+        </form>
     </div>
 </aside>

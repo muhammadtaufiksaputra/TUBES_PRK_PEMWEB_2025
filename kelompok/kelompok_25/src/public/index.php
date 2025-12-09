@@ -5,14 +5,46 @@
  * Semua request masuk melalui file ini
  */
 
-// Start session
-session_start();
-
-// Define root path
+// Define root path first
 define('ROOT_PATH', dirname(__DIR__));
 
-// Load configuration
+// Load configuration first to get session settings
 require_once ROOT_PATH . '/config/config.php';
+
+// Ensure session directory exists and is writable
+$sessionPath = sys_get_temp_dir();
+if (!is_dir($sessionPath)) {
+    mkdir($sessionPath, 0755, true);
+}
+
+// Configure session before starting
+ini_set('session.use_strict_mode', '1');
+ini_set('session.cookie_httponly', '1');
+ini_set('session.cookie_samesite', 'Lax');
+ini_set('session.gc_maxlifetime', (string)SESSION_LIFETIME);
+ini_set('session.cookie_lifetime', (string)SESSION_LIFETIME);
+ini_set('session.use_cookies', '1');
+ini_set('session.use_only_cookies', '1');
+ini_set('session.save_path', $sessionPath);
+
+// Set session name
+session_name(SESSION_NAME);
+
+// Start session
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Regenerate session ID periodically for security
+if (!isset($_SESSION['created'])) {
+    $_SESSION['created'] = time();
+} elseif (time() - $_SESSION['created'] > 1800) {
+    // Regenerate session ID every 30 minutes
+    session_regenerate_id(true);
+    $_SESSION['created'] = time();
+}
+
+// Load database configuration
 require_once ROOT_PATH . '/config/database.php';
 
 // Load helpers

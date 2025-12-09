@@ -21,7 +21,7 @@ $router->get('/dashboard', function() {
     $controller->index();
 });
 
-$router->get('/logout', 'web/AuthController@logout');
+$router->post('/logout', 'web/AuthController@logout');
 
 // Sidebar placeholder pages
 $router->get('/materials', 'web/PageController@materials');

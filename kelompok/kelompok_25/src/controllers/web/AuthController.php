@@ -48,6 +48,12 @@ class AuthController extends Controller
             $this->back();
         }
 
+        // Verify session is set
+        if (!Auth::check()) {
+            set_flash('error', 'Gagal membuat session. Silakan coba lagi.');
+            $this->back();
+        }
+
         // Update last login
         $userModel = new User();
         $userModel->updateLastLogin(Auth::id());
@@ -128,6 +134,12 @@ class AuthController extends Controller
      */
     public function logout()
     {
+        // Verify CSRF token
+        if (!csrf_verify($_POST['csrf_token'] ?? '')) {
+            set_flash('error', 'Invalid CSRF token.');
+            $this->redirect('/login');
+        }
+
         Auth::logout();
         set_flash('success', 'Berhasil logout.');
         $this->redirect('/login');

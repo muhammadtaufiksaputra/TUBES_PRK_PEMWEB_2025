@@ -21,7 +21,7 @@ class Model
     public function all()
     {
         $stmt = $this->db->query("SELECT * FROM {$this->table}");
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
@@ -31,7 +31,7 @@ class Model
     {
         $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE {$this->primaryKey} = ?");
         $stmt->execute([$id]);
-        return $stmt->fetch();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     /**
@@ -41,7 +41,7 @@ class Model
     {
         $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE $field = ?");
         $stmt->execute([$value]);
-        return $stmt->fetch();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     /**
@@ -51,7 +51,7 @@ class Model
     {
         $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE $field = ?");
         $stmt->execute([$value]);
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**

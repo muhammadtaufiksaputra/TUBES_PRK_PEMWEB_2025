@@ -11,6 +11,10 @@ class Auth
      */
     public static function login($user)
     {
+        // Regenerate session ID to prevent session fixation
+        session_regenerate_id(true);
+        
+        // Set session data
         $_SESSION['user'] = [
             'id' => $user['id'],
             'name' => $user['name'],
@@ -20,6 +24,11 @@ class Auth
             'role_name' => $user['role_name'],
             'avatar_url' => $user['avatar_url'] ?? null,
         ];
+        
+        // Mark session as authenticated
+        $_SESSION['authenticated'] = true;
+        $_SESSION['last_activity'] = time();
+        $_SESSION['created'] = time();
 
         // Set remember me cookie if needed
         if (isset($_POST['remember']) && $_POST['remember']) {
@@ -28,6 +37,10 @@ class Auth
 
         // Log activity
         self::logActivity($user['id'], 'login');
+        
+        // Force session write
+        session_write_close();
+        session_start();
     }
 
     /**
@@ -44,8 +57,19 @@ class Auth
         // Clear remember me cookie
         self::clearRememberCookie();
 
-        // Destroy session
+        // Clear session cookie
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params['path'], $params['domain'],
+                $params['secure'], $params['httponly']
+            );
+        }
+
+        // Clear all session data
         $_SESSION = [];
+        
+        // Destroy session
         session_destroy();
     }
 
@@ -54,7 +78,22 @@ class Auth
      */
     public static function check()
     {
-        return isset($_SESSION['user']);
+        // Check if session exists and is authenticated
+        if (!isset($_SESSION['user']) || !isset($_SESSION['authenticated'])) {
+            return false;
+        }
+        
+        // Check session timeout
+        if (isset($_SESSION['last_activity'])) {
+            $timeout = SESSION_LIFETIME;
+            if (time() - $_SESSION['last_activity'] > $timeout) {
+                self::logout();
+                return false;
+            }
+            $_SESSION['last_activity'] = time();
+        }
+        
+        return true;
     }
 
     /**
