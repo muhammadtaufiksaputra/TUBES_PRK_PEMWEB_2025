@@ -11,6 +11,13 @@ $router->post('/api/auth/logout', 'api/AuthApiController@logout');
 $router->get('/api/auth/me', 'api/AuthApiController@me');
 $router->get('/api/auth/check', 'api/AuthApiController@check');
 
+//StockOut
+$router->get('/api/stock-out', function() {
+    AuthMiddleware::check();
+    Response::success('Stock Out API endpoint', []);
+});
+
+
 // Materials API routes
 $router->get('/api/materials', function() {
     AuthMiddleware::check();
