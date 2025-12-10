@@ -9,7 +9,7 @@ define('APP_ENV', 'development'); // 'development' atau 'production'
 define('APP_DEBUG', true);
 
 // Base URL
-define('BASE_URL', 'http://localhost/TUBES_PRK_PEMWEB_2025/kelompok/kelompok_25/src/public');
+define('BASE_URL', 'http://localhost:8000');
 define('ASSETS_URL', BASE_URL . '/assets');
 define('UPLOAD_URL', BASE_URL . '/assets/uploads');
 

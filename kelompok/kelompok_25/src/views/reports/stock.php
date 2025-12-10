@@ -18,49 +18,51 @@
                 <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600 text-xl">📦</span>
             </div>
             <p class="text-sm text-slate-500">Total Item</p>
-            <p class="text-2xl font-semibold text-slate-900"><?= $summary['total_items'] ?? 0 ?></p>
+            <p class="text-2xl font-semibold text-slate-900"><?= isset($summary) ? ($summary['total_items'] ?? 0) : 0 ?></p>
         </article>
         <article class="rounded-2xl bg-white shadow-sm border border-slate-100 p-5 flex flex-col gap-3">
             <div class="flex items-center justify-between">
                 <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 text-xl">✓</span>
             </div>
             <p class="text-sm text-slate-500">Total Nilai</p>
-            <p class="text-2xl font-semibold text-slate-900">Rp <?= number_format($summary['total_value'] ?? 0, 0, ',', '.') ?></p>
+            <p class="text-2xl font-semibold text-slate-900">Rp <?= number_format(isset($summary) ? ($summary['total_value'] ?? 0) : 0, 0, ',', '.') ?></p>
         </article>
         <article class="rounded-2xl bg-white shadow-sm border border-slate-100 p-5 flex flex-col gap-3">
             <div class="flex items-center justify-between">
                 <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600 text-xl">⚠</span>
             </div>
             <p class="text-sm text-slate-500">Perlu Restock</p>
-            <p class="text-2xl font-semibold text-slate-900"><?= $summary['restock_needed'] ?? 0 ?> Item</p>
+            <p class="text-2xl font-semibold text-slate-900"><?= isset($summary) ? ($summary['restock_needed'] ?? 0) : 0 ?> Item</p>
         </article>
         <article class="rounded-2xl bg-white shadow-sm border border-slate-100 p-5 flex flex-col gap-3">
             <div class="flex items-center justify-between">
                 <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-rose-100 text-rose-600 text-xl">⊗</span>
             </div>
             <p class="text-sm text-slate-500">Hampir Habis</p>
-            <p class="text-2xl font-semibold text-slate-900"><?= $summary['almost_empty'] ?? 0 ?> Item</p>
+            <p class="text-2xl font-semibold text-slate-900"><?= isset($summary) ? ($summary['almost_empty'] ?? 0) : 0 ?> Item</p>
         </article>
     </div>
 
     <div class="rounded-2xl bg-white border border-slate-100 shadow-sm p-4 flex flex-wrap gap-3">
         <div class="flex-1 min-w-[250px] relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
-            <input type="text" id="searchInput" placeholder="Cari bahan baku..." value="<?= htmlspecialchars($filters['search']) ?>" class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input type="text" id="searchInput" placeholder="Cari bahan baku..." value="<?= htmlspecialchars(isset($filters) ? ($filters['search'] ?? '') : '') ?>" class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
         <select id="categoryFilter" class="px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="">Semua Kategori</option>
-            <?php foreach ($categories as $cat): ?>
-                <option value="<?= htmlspecialchars($cat['name']) ?>" <?= $filters['category'] === $cat['name'] ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($cat['name']) ?>
-                </option>
-            <?php endforeach; ?>
+            <?php if (isset($categories) && is_array($categories)): ?>
+                <?php foreach ($categories as $cat): ?>
+                    <option value="<?= htmlspecialchars($cat['name'] ?? '') ?>" <?= isset($filters) && ($filters['category'] ?? '') === ($cat['name'] ?? '') ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($cat['name'] ?? '') ?>
+                    </option>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </select>
         <select id="statusFilter" class="px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="">Semua Status</option>
-            <option value="Aman" <?= $filters['status'] === 'Aman' ? 'selected' : '' ?>>Aman</option>
-            <option value="Hampir Habis" <?= $filters['status'] === 'Hampir Habis' ? 'selected' : '' ?>>Hampir Habis</option>
-            <option value="Perlu Restock" <?= $filters['status'] === 'Perlu Restock' ? 'selected' : '' ?>>Perlu Restock</option>
+            <option value="Aman" <?= isset($filters) && ($filters['status'] ?? '') === 'Aman' ? 'selected' : '' ?>>Aman</option>
+            <option value="Hampir Habis" <?= isset($filters) && ($filters['status'] ?? '') === 'Hampir Habis' ? 'selected' : '' ?>>Hampir Habis</option>
+            <option value="Perlu Restock" <?= isset($filters) && ($filters['status'] ?? '') === 'Perlu Restock' ? 'selected' : '' ?>>Perlu Restock</option>
         </select>
     </div>
 
@@ -79,7 +81,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    <?php if (empty($materials)): ?>
+                    <?php if (!isset($materials) || empty($materials)): ?>
                         <tr>
                             <td colspan="7" class="px-6 py-12 text-center text-sm text-slate-400">Tidak ada data</td>
                         </tr>
@@ -139,19 +141,12 @@ function applyFilters() {
     if (category) params.append('category', category);
     if (status) params.append('status', status);
     
-    window.location.href = '?' + params.toString();
+    window.location.href = '/reports/stock?' + params.toString();
 }
 
 function exportExcel() {
-    const search = document.getElementById('searchInput').value;
-    const category = document.getElementById('categoryFilter').value;
-    const status = document.getElementById('statusFilter').value;
-    
-    const params = new URLSearchParams();
-    if (search) params.append('search', search);
-    if (category) params.append('category', category);
-    if (status) params.append('status', status);
-    
-    window.location.href = '/reports/export-excel?' + params.toString();
+    alert('Fitur export Excel akan segera tersedia!');
+    // TODO: Implement export functionality
+    // window.location.href = '/api/reports/stock/export?' + new URLSearchParams({...filters});
 }
 </script>
