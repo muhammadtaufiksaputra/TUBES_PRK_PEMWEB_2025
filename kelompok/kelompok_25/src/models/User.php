@@ -148,4 +148,77 @@ class User extends Model
             'updated_at' => date('Y-m-d H:i:s')
         ]);
     }
+
+    /**
+     * Get paginated users with optional filters and default role
+     */
+    public function getPaginated($page = 1, $perPage = 20, $filters = [])
+    {
+        $page = max(1, (int)$page);
+        $perPage = max(1, min(100, (int)$perPage));
+        $offset = ($page - 1) * $perPage;
+
+        $where = [];
+        $params = [];
+
+        if (!empty($filters['search'])) {
+            $where[] = '(u.name LIKE ? OR u.email LIKE ?)';
+            $search = '%' . $filters['search'] . '%';
+            $params[] = $search;
+            $params[] = $search;
+        }
+
+        if (isset($filters['is_active'])) {
+            $where[] = 'u.is_active = ?';
+            $params[] = (int)$filters['is_active'];
+        }
+
+        if (!empty($filters['role_id'])) {
+            $where[] = 'ur.role_id = ?';
+            $params[] = (int)$filters['role_id'];
+        }
+
+        $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+
+        $countSql = "SELECT COUNT(DISTINCT u.id)
+                     FROM users u
+                     LEFT JOIN user_roles ur ON u.id = ur.user_id {$whereSql}";
+        $total = (int)$this->query($countSql, $params)->fetchColumn();
+
+        $dataSql = "SELECT u.*, r.id AS role_id, r.code AS role_code, r.name AS role_name
+                    FROM users u
+                    LEFT JOIN user_roles ur ON u.id = ur.user_id AND ur.is_default = 1
+                    LEFT JOIN roles r ON ur.role_id = r.id
+                    {$whereSql}
+                    ORDER BY u.created_at DESC
+                    LIMIT ? OFFSET ?";
+
+        $dataParams = array_merge($params, [$perPage, $offset]);
+        $data = $this->query($dataSql, $dataParams)->fetchAll();
+
+        return [
+            'data' => $data,
+            'total' => $total,
+            'page' => $page,
+            'per_page' => $perPage,
+            'last_page' => (int)ceil($total / $perPage)
+        ];
+    }
+
+    /**
+     * Update user data (handles password hashing)
+     */
+    public function updateUser($userId, $data)
+    {
+        if (isset($data['password'])) {
+            if (!empty($data['password'])) {
+                $data['password_hash'] = password_hash($data['password'], HASH_ALGO, ['cost' => HASH_COST]);
+            }
+            unset($data['password']);
+        }
+
+        $data['updated_at'] = date('Y-m-d H:i:s');
+
+        return $this->update($userId, $data);
+    }
 }

@@ -193,12 +193,35 @@ class PageController extends Controller
 
     public function reportsLowStock()
     {
-        $this->renderPlaceholder('Bahan Hampir Habis', 'Pantau bahan yang perlu restock pada halaman ini.');
+        try {
+            require_once ROOT_PATH . '/models/Material.php';
+            require_once ROOT_PATH . '/models/Category.php';
+
+            // Get categories for filter dropdown
+            $categoryModel = new Category();
+            $categories = $categoryModel->getAll();
+
+            $this->view('reports/low-stock', [
+                'title' => 'Bahan Hampir Habis',
+                'categories' => $categories ?? []
+            ]);
+        } catch (Exception $e) {
+            error_log("Reports Low Stock Error: " . $e->getMessage());
+            $this->view('reports/low-stock', [
+                'title' => 'Bahan Hampir Habis',
+                'categories' => []
+            ]);
+        }
     }
 
     public function roles()
     {
-        $this->renderPlaceholder('Manajemen Role', 'Pengaturan role & akses pengguna akan dibuat di sini.');
+        $this->view('roles/index', ['title' => 'Manajemen Role']);
+    }
+
+    public function users()
+    {
+        $this->view('users/index', ['title' => 'Manajemen User']);
     }
 
     public function profile()

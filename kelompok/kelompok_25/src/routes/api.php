@@ -11,6 +11,32 @@ $router->post('/api/auth/logout', 'api/AuthApiController@logout');
 $router->get('/api/auth/me', 'api/AuthApiController@me');
 $router->get('/api/auth/check', 'api/AuthApiController@check');
 
+// User & Role Management API routes
+$router->get('/api/users', 'api/UserApiController@index');
+$router->get('/api/users/{id}', 'api/UserApiController@show');
+$router->post('/api/users', 'api/UserApiController@store');
+$router->post('/api/users/{id}', 'api/UserApiController@update');
+$router->post('/api/users/{id}/deactivate', 'api/UserApiController@deactivate');
+$router->post('/api/users/{id}/reset-password', 'api/UserApiController@resetPassword');
+$router->post('/api/users/{id}/role', 'api/UserApiController@setRole');
+
+$router->get('/api/roles', 'api/RoleApiController@index');
+$router->get('/api/roles/{id}', 'api/RoleApiController@show');
+$router->post('/api/roles', 'api/RoleApiController@store');
+$router->post('/api/roles/{id}', 'api/RoleApiController@update');
+$router->post('/api/roles/{id}/delete', 'api/RoleApiController@destroy');
+$router->post('/api/roles/{id}/permissions', 'api/RoleApiController@syncPermissions');
+
+$router->get('/api/permissions', 'api/RoleApiController@permissions');
+
+// Low Stock Alert API routes
+$router->get('/api/low-stock', 'api/LowStockApiController@index');
+$router->get('/api/low-stock/summary', 'api/LowStockApiController@summary');
+$router->get('/api/low-stock/categories', 'api/LowStockApiController@categories');
+$router->get('/api/low-stock/urgent', 'api/LowStockApiController@urgent');
+$router->get('/api/low-stock/reorder-suggestions', 'api/LowStockApiController@reorderSuggestions');
+$router->post('/api/low-stock/{id}/notify', 'api/LowStockApiController@notify');
+
 // Supplier API routes
 $router->get('/api/suppliers', 'api/SupplierApiController@index');
 $router->get('/api/suppliers/search', 'api/SupplierApiController@search');

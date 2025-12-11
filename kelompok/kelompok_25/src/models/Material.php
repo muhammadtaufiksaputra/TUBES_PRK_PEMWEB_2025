@@ -250,4 +250,92 @@ class Material extends Model {
         $stmt = $this->query($sql, [$quantity, $materialId]);
         return $stmt->rowCount() > 0;
     }
+
+    /**
+     * Get materials with low stock (current_stock <= min_stock)
+     */
+    public function getLowStock($page = 1, $perPage = 20, $filters = [])
+    {
+        $page = max(1, (int)$page);
+        $perPage = max(1, min(100, (int)$perPage));
+        $offset = ($page - 1) * $perPage;
+
+        $where = ['m.is_active = 1', 'm.current_stock <= m.min_stock'];
+        $params = [];
+
+        if (!empty($filters['search'])) {
+            $where[] = '(m.name LIKE ? OR m.code LIKE ?)';
+            $search = '%' . $filters['search'] . '%';
+            $params[] = $search;
+            $params[] = $search;
+        }
+
+        if (!empty($filters['category_id'])) {
+            $where[] = 'm.category_id = ?';
+            $params[] = (int)$filters['category_id'];
+        }
+
+        if (isset($filters['only_out_of_stock']) && $filters['only_out_of_stock']) {
+            $where[] = 'm.current_stock = 0';
+        }
+
+        $whereSql = 'WHERE ' . implode(' AND ', $where);
+
+        $countSql = "SELECT COUNT(*) FROM materials m {$whereSql}";
+        $total = (int)$this->query($countSql, $params)->fetchColumn();
+
+        $dataSql = "SELECT 
+                        m.id,
+                        m.code,
+                        m.name,
+                        m.unit,
+                        m.current_stock,
+                        m.min_stock,
+                        c.name as category_name,
+                        s.name as supplier_name,
+                        COALESCE(
+                            (SELECT unit_price FROM stock_in WHERE material_id = m.id ORDER BY created_at DESC LIMIT 1),
+                            0
+                        ) as last_unit_price,
+                        (m.min_stock - m.current_stock) as shortage_quantity,
+                        CASE 
+                            WHEN m.current_stock = 0 THEN 'out_of_stock'
+                            WHEN m.current_stock <= m.min_stock THEN 'low_stock'
+                            ELSE 'normal'
+                        END as status
+                    FROM materials m
+                    LEFT JOIN categories c ON m.category_id = c.id
+                    LEFT JOIN suppliers s ON m.default_supplier_id = s.id
+                    {$whereSql}
+                    ORDER BY m.current_stock ASC, m.name ASC
+                    LIMIT ? OFFSET ?";
+
+        $dataParams = array_merge($params, [$perPage, $offset]);
+        $data = $this->query($dataSql, $dataParams)->fetchAll();
+
+        return [
+            'data' => $data,
+            'total' => $total,
+            'page' => $page,
+            'per_page' => $perPage,
+            'last_page' => (int)ceil($total / $perPage)
+        ];
+    }
+
+    /**
+     * Get low stock summary statistics
+     */
+    public function getLowStockSummary()
+    {
+        $sql = "SELECT 
+                    COUNT(*) as total_low_stock,
+                    SUM(CASE WHEN m.current_stock = 0 THEN 1 ELSE 0 END) as out_of_stock,
+                    SUM(CASE WHEN m.current_stock > 0 AND m.current_stock <= m.min_stock THEN 1 ELSE 0 END) as critical,
+                    SUM(m.min_stock - m.current_stock) as total_shortage_quantity
+                FROM materials m
+                WHERE m.is_active = 1 AND m.current_stock <= m.min_stock";
+
+        $stmt = $this->query($sql);
+        return $stmt->fetch();
+    }
 }

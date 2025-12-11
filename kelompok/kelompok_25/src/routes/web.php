@@ -34,4 +34,5 @@ $router->get('/reports/stock', 'web/PageController@reportsStock');
 $router->get('/reports/transactions', 'web/PageController@reportsTransactions');
 $router->get('/reports/low-stock', 'web/PageController@reportsLowStock');
 $router->get('/roles', 'web/PageController@roles');
+$router->get('/users', 'web/PageController@users');
 $router->get('/profile', 'web/PageController@profile');

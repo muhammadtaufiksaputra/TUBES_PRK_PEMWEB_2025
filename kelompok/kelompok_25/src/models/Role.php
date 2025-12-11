@@ -81,4 +81,46 @@ class Role extends Model
         $stmt = $this->query($sql, [$roleId]);
         return $stmt->fetchAll();
     }
+
+    /**
+     * Get paginated roles with optional search and status filters
+     */
+    public function getPaginated($page = 1, $perPage = 20, $filters = [])
+    {
+        $page = max(1, (int)$page);
+        $perPage = max(1, min(100, (int)$perPage));
+        $offset = ($page - 1) * $perPage;
+
+        $where = [];
+        $params = [];
+
+        if (!empty($filters['search'])) {
+            $where[] = '(r.name LIKE ? OR r.code LIKE ?)';
+            $search = '%' . $filters['search'] . '%';
+            $params[] = $search;
+            $params[] = $search;
+        }
+
+        if (isset($filters['is_active'])) {
+            $where[] = 'r.is_active = ?';
+            $params[] = (int)$filters['is_active'];
+        }
+
+        $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+
+        $countSql = "SELECT COUNT(*) FROM roles r {$whereSql}";
+        $total = (int)$this->query($countSql, $params)->fetchColumn();
+
+        $dataSql = "SELECT r.* FROM roles r {$whereSql} ORDER BY r.created_at DESC LIMIT ? OFFSET ?";
+        $dataParams = array_merge($params, [$perPage, $offset]);
+        $data = $this->query($dataSql, $dataParams)->fetchAll();
+
+        return [
+            'data' => $data,
+            'total' => $total,
+            'page' => $page,
+            'per_page' => $perPage,
+            'last_page' => (int)ceil($total / $perPage)
+        ];
+    }
 }
