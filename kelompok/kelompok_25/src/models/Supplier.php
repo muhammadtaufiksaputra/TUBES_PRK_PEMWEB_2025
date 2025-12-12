@@ -11,28 +11,46 @@ class Supplier extends Model
     protected $table = 'suppliers';
 
     /**
-     * Get all active suppliers with pagination
+     * Get all active suppliers with pagination and search
      */
-    public function getAllActive($page = 1, $perPage = 10)
+    public function getAllActive($page = 1, $perPage = 10, $search = '')
     {
         $offset = ($page - 1) * $perPage;
         
         $sql = "SELECT * FROM {$this->table} 
-                WHERE is_active = TRUE 
-                ORDER BY name ASC 
-                LIMIT ? OFFSET ?";
+                WHERE is_active = TRUE";
         
-        $stmt = $this->query($sql, [$perPage, $offset]);
+        $params = [];
+        
+        if (!empty($search)) {
+            $sql .= " AND (name LIKE ? OR contact_person LIKE ? OR phone LIKE ? OR email LIKE ?)";
+            $searchParam = '%' . $search . '%';
+            $params = [$searchParam, $searchParam, $searchParam, $searchParam];
+        }
+        
+        $sql .= " ORDER BY name ASC LIMIT ? OFFSET ?";
+        $params[] = $perPage;
+        $params[] = $offset;
+        
+        $stmt = $this->query($sql, $params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
-     * Get count of all active suppliers
+     * Get count of all active suppliers with search
      */
-    public function countActive()
+    public function countActive($search = '')
     {
         $sql = "SELECT COUNT(*) as total FROM {$this->table} WHERE is_active = TRUE";
-        $stmt = $this->query($sql);
+        $params = [];
+        
+        if (!empty($search)) {
+            $sql .= " AND (name LIKE ? OR contact_person LIKE ? OR phone LIKE ? OR email LIKE ?)";
+            $searchParam = '%' . $search . '%';
+            $params = [$searchParam, $searchParam, $searchParam, $searchParam];
+        }
+        
+        $stmt = $this->query($sql, $params);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result['total'] ?? 0;
     }

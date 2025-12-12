@@ -367,7 +367,10 @@ const RoleManagement = (function() {
             const users = usersResult.success ? (usersResult.data.data || []) : [];
 
             // Get permissions for this role
-            const permissionIds = role.permission_ids || [];
+            // Convert comma-separated string to array of integers
+            const permissionIds = role.permission_ids 
+                ? String(role.permission_ids).split(',').map(id => parseInt(id.trim()))
+                : [];
             const permissions = allPermissions.filter(p => permissionIds.includes(p.id));
 
             // Create modal content
@@ -409,22 +412,6 @@ const RoleManagement = (function() {
                                         `).join('')}
                                     </div>
                                 ` : '<p class="text-sm text-slate-500">Belum ada user dengan role ini</p>'}
-                            </div>
-
-                            <div>
-                                <h3 class="text-sm font-semibold text-slate-700 mb-3">🔑 Hak Akses (${permissions.length})</h3>
-                                ${permissions.length > 0 ? `
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                        ${permissions.map(perm => `
-                                            <div class="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
-                                                <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                                </svg>
-                                                <span class="text-sm text-slate-700">${escapeHtml(perm.name)}</span>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                ` : '<p class="text-sm text-slate-500">Tidak ada hak akses</p>'}
                             </div>
                         </div>
                     </div>

@@ -14,21 +14,55 @@
         </button>
     </div>
 
+    <!-- FILTERS -->
+    <div class="bg-white border border-slate-100 rounded-3xl shadow-sm p-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="text-sm text-slate-600">Material</label>
+                <select id="filterMaterial" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-100 focus:border-orange-400">
+                    <option value="">Semua Material</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-sm text-slate-600">Jenis Penggunaan</label>
+                <select id="filterUsageType" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-100 focus:border-orange-400">
+                    <option value="">Semua Jenis</option>
+                    <option value="production">Produksi</option>
+                    <option value="sale">Penjualan</option>
+                    <option value="waste">Terbuang</option>
+                    <option value="transfer">Transfer</option>
+                    <option value="other">Lainnya</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-sm text-slate-600">Dari Tanggal</label>
+                <input type="date" id="filterStartDate" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-100 focus:border-orange-400">
+            </div>
+            <div>
+                <label class="text-sm text-slate-600">Sampai Tanggal</label>
+                <input type="date" id="filterEndDate" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-100 focus:border-orange-400">
+            </div>
+        </div>
+    </div>
+
     <!-- TABLE -->
     <div class="bg-white border border-slate-100 rounded-3xl shadow-sm p-6">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead class="text-slate-500 border-b">
                     <tr>
-                        <th class="py-3 px-4 text-left w-16">No</th>
-                        <th class="py-3 px-4 text-left">Material</th>
-                        <th class="py-3 px-4 text-right w-32">Jumlah</th>
-                        <th class="py-3 px-4 text-left w-48">Tanggal</th>
+                        <th class="py-3 text-left">No</th>
+                        <th class="text-left">No. Referensi</th>
+                        <th class="text-left">Material</th>
+                        <th class="text-right">Jumlah</th>
+                        <th class="text-left">Jenis</th>
+                        <th class="text-left">Tujuan</th>
+                        <th class="text-left">Tanggal</th>
                     </tr>
                 </thead>
                 <tbody class="text-slate-700" id="stockOutTableBody">
                     <tr>
-                        <td colspan="4" class="py-10 text-center">
+                        <td colspan="8" class="py-10 text-center">
                             <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-orange-500 border-r-transparent"></div>
                             <p class="mt-2 text-slate-400">Memuat data...</p>
                         </td>

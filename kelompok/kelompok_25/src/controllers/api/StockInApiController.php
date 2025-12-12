@@ -136,6 +136,19 @@ class StockInApiController extends Controller
                 return;
             }
 
+            // Generate reference number if not provided
+            if (empty($data['reference_number'])) {
+                $data['reference_number'] = $this->stockInModel->generateReferenceNumber();
+            } else {
+                // Check if reference number exists
+                if ($this->stockInModel->referenceExists($data['reference_number'])) {
+                    Response::error('Reference number already exists', 422, [
+                        'errors' => ['reference_number' => 'Reference number already in use']
+                    ]);
+                    return;
+                }
+            }
+
             // Calculate total price
             $data['total_price'] = $data['quantity'] * $data['unit_price'];
 
@@ -170,7 +183,7 @@ class StockInApiController extends Controller
                 $transaction = $this->stockInModel->findById($transactionId);
 
                 $this->logActivity('create', 'stock_in', $transactionId, 
-                    "Created stock in: {$material['name']} ({$data['quantity']} {$material['unit']})");
+                    "Created stock in: {$data['reference_number']} - {$material['name']} ({$data['quantity']} {$material['unit']})");
 
                 Response::created('Stock in transaction created successfully', $transaction);
 

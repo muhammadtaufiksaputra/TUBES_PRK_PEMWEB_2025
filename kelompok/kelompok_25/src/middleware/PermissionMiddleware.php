@@ -16,8 +16,7 @@ class PermissionMiddleware
     public static function handle($permissions)
     {
         if (!is_logged_in()) {
-            redirect_to('/login');
-            exit;
+            redirect('/login');
         }
 
         // Convert single permission to array
@@ -36,11 +35,11 @@ class PermissionMiddleware
 
         if (!$hasPermission) {
             // Set flash message
-            $_SESSION['flash_error'] = 'Anda tidak memiliki akses untuk halaman ini.';
+            $_SESSION['flash_error'] = 'Anda tidak memiliki izin untuk mengakses halaman ini. Silakan hubungi administrator untuk mengatur hak akses Anda.';
             
-            // Redirect to dashboard or previous page
-            $previousUrl = $_SERVER['HTTP_REFERER'] ?? url('/dashboard');
-            redirect_to($previousUrl);
+            // Show unauthorized page
+            http_response_code(403);
+            require_once ROOT_PATH . '/views/errors/unauthorized.php';
             exit;
         }
 
@@ -53,8 +52,7 @@ class PermissionMiddleware
     public static function requireAll($permissions)
     {
         if (!is_logged_in()) {
-            redirect_to('/login');
-            exit;
+            redirect('/login');
         }
 
         if (!is_array($permissions)) {
@@ -63,9 +61,11 @@ class PermissionMiddleware
 
         foreach ($permissions as $permission) {
             if (!has_permission($permission)) {
-                $_SESSION['flash_error'] = 'Anda tidak memiliki akses untuk halaman ini.';
-                $previousUrl = $_SERVER['HTTP_REFERER'] ?? url('/dashboard');
-                redirect_to($previousUrl);
+                $_SESSION['flash_error'] = 'Anda tidak memiliki izin untuk mengakses halaman ini. Silakan hubungi administrator untuk mengatur hak akses Anda.';
+                
+                // Show unauthorized page
+                http_response_code(403);
+                require_once ROOT_PATH . '/views/errors/unauthorized.php';
                 exit;
             }
         }

@@ -6,7 +6,6 @@
 
 // Auth API routes
 $router->post('/api/auth/login', 'api/AuthApiController@login');
-$router->post('/api/auth/register', 'api/AuthApiController@register');
 $router->post('/api/auth/logout', 'api/AuthApiController@logout');
 $router->get('/api/auth/me', 'api/AuthApiController@me');
 $router->get('/api/auth/check', 'api/AuthApiController@check');

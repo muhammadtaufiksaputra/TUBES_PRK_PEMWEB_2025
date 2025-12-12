@@ -26,7 +26,7 @@ try {
     foreach ($roles as $role) {
         $stmt = $db->prepare("INSERT INTO roles (code, name, description, is_active) 
                              VALUES (?, ?, ?, 1) 
-                             ON DUPLICATE KEY UPDATE name=VALUES(name), description=VALUES(description)");
+                             ON DUPLICATE KEY UPDATE name=VALUES(name), description=VALUES(description), is_active=VALUES(is_active)");
         $stmt->execute([$role['code'], $role['name'], $role['description']]);
         echo "   ✓ Role: {$role['name']}\n";
     }
@@ -87,8 +87,8 @@ try {
     
     $permissionIds = [];
     foreach ($permissions as $perm) {
-        $stmt = $db->prepare("INSERT INTO permissions (code, name, description, is_active) 
-                             VALUES (?, ?, ?, 1) 
+        $stmt = $db->prepare("INSERT INTO permissions (code, name, description) 
+                             VALUES (?, ?, ?) 
                              ON DUPLICATE KEY UPDATE name=VALUES(name), description=VALUES(description)");
         $stmt->execute([$perm[0], $perm[1], $perm[2]]);
         
@@ -179,7 +179,7 @@ try {
     
     // 6. Summary
     echo "\n=== Summary ===\n";
-    $stmt = $db->query("SELECT COUNT(*) FROM permissions WHERE is_active = 1");
+    $stmt = $db->query("SELECT COUNT(*) FROM permissions");
     echo "Total Permissions: " . $stmt->fetchColumn() . "\n";
     
     $stmt = $db->query("SELECT r.name, COUNT(rp.id) as perm_count 

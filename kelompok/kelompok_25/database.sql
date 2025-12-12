@@ -11,10 +11,11 @@ CREATE TABLE roles (
     name VARCHAR(50) NOT NULL,
     code VARCHAR(50) NOT NULL UNIQUE,
     description VARCHAR(255),
-    is_active TINYINT(1) DEFAULT 1,
+    is_active BOOLEAN DEFAULT TRUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_code (code)
+    INDEX idx_code (code),
+    INDEX idx_active (is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: permissions
@@ -23,7 +24,6 @@ CREATE TABLE permissions (
     name VARCHAR(100) NOT NULL,
     code VARCHAR(100) NOT NULL UNIQUE,
     description VARCHAR(255),
-    is_active TINYINT(1) DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_code (code)
@@ -148,6 +148,7 @@ CREATE TABLE stock_out (
     usage_type VARCHAR(100),
     txn_date DATE NOT NULL,
     reference_number VARCHAR(100),
+    destination VARCHAR(100),
     note TEXT,
     created_by INT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -192,64 +193,28 @@ CREATE TABLE activity_logs (
 
 -- Insert default roles
 INSERT INTO roles (name, code, description, is_active) VALUES
-('Administrator', 'admin', 'Full access to all features', 1),
-('Manager', 'manager', 'Manage inventory and reports', 1),
-('Staff', 'staff', 'Basic inventory operations', 1);
+('Administrator', 'admin', 'Full access to all features', TRUE),
+('Manager', 'manager', 'Manage inventory and reports', TRUE),
+('Staff', 'staff', 'Basic inventory operations', TRUE);
 
--- Insert default permissions (33 permissions)
-INSERT INTO permissions (name, code, description, is_active) VALUES
--- Dashboard (1)
-('View Dashboard', 'view_dashboard', 'Access to dashboard', 1),
+-- Insert default permissions
+INSERT INTO permissions (name, code, description) VALUES
+('View Dashboard', 'view_dashboard', 'Access to dashboard'),
+('Manage Users', 'manage_users', 'Create, edit, delete users'),
+('Manage Roles', 'manage_roles', 'Create, edit, delete roles'),
+('View Materials', 'view_materials', 'View materials list'),
+('Create Materials', 'create_materials', 'Add new materials'),
+('Edit Materials', 'edit_materials', 'Edit existing materials'),
+('Delete Materials', 'delete_materials', 'Delete materials'),
+('View Stock', 'view_stock', 'View stock information'),
+('Stock In', 'stock_in', 'Record stock in transactions'),
+('Stock Out', 'stock_out', 'Record stock out transactions'),
+('Stock Adjustment', 'stock_adjustment', 'Adjust stock levels'),
+('View Reports', 'view_reports', 'Access to reports'),
+('Manage Suppliers', 'manage_suppliers', 'Manage suppliers'),
+('Manage Categories', 'manage_categories', 'Manage categories');
 
--- Materials (6)
-('View Materials', 'view_materials', 'View materials list', 1),
-('Create Materials', 'create_materials', 'Add new materials', 1),
-('Edit Materials', 'edit_materials', 'Edit existing materials', 1),
-('Delete Materials', 'delete_materials', 'Delete materials', 1),
-('Export Materials', 'export_materials', 'Export materials data', 1),
-('Import Materials', 'import_materials', 'Import materials data', 1),
-
--- Categories (4)
-('View Categories', 'view_categories', 'View categories list', 1),
-('Create Categories', 'create_categories', 'Add new categories', 1),
-('Edit Categories', 'edit_categories', 'Edit existing categories', 1),
-('Delete Categories', 'delete_categories', 'Delete categories', 1),
-
--- Suppliers (4)
-('View Suppliers', 'view_suppliers', 'View suppliers list', 1),
-('Create Suppliers', 'create_suppliers', 'Add new suppliers', 1),
-('Edit Suppliers', 'edit_suppliers', 'Edit existing suppliers', 1),
-('Delete Suppliers', 'delete_suppliers', 'Delete suppliers', 1),
-
--- Stock In (4)
-('View Stock In', 'view_stock_in', 'View stock in transactions', 1),
-('Create Stock In', 'create_stock_in', 'Record stock in transactions', 1),
-('Edit Stock In', 'edit_stock_in', 'Edit stock in transactions', 1),
-('Delete Stock In', 'delete_stock_in', 'Delete stock in transactions', 1),
-
--- Stock Out (4)
-('View Stock Out', 'view_stock_out', 'View stock out transactions', 1),
-('Create Stock Out', 'create_stock_out', 'Record stock out transactions', 1),
-('Edit Stock Out', 'edit_stock_out', 'Edit stock out transactions', 1),
-('Delete Stock Out', 'delete_stock_out', 'Delete stock out transactions', 1),
-
--- Stock Adjustments (3)
-('View Stock Adjustments', 'view_stock_adjustments', 'View stock adjustments', 1),
-('Create Stock Adjustments', 'create_stock_adjustments', 'Create stock adjustments', 1),
-('Delete Stock Adjustments', 'delete_stock_adjustments', 'Delete stock adjustments', 1),
-
--- Reports (3)
-('View Reports', 'view_reports', 'Access to reports', 1),
-('Export Reports', 'export_reports', 'Export report data', 1),
-('View Low Stock', 'view_low_stock', 'View low stock alerts', 1),
-
--- Users (4)
-('View Users', 'view_users', 'View users list', 1),
-('Create Users', 'create_users', 'Add new users', 1),
-('Edit Users', 'edit_users', 'Edit existing users', 1),
-('Delete Users', 'delete_users', 'Delete users', 1);
-
--- Assign ALL permissions to Administrator role
+-- Assign permissions to admin role
 INSERT INTO role_permissions (role_id, permission_id, is_default)
 SELECT 
     (SELECT id FROM roles WHERE code = 'admin'),
@@ -257,40 +222,25 @@ SELECT
     TRUE
 FROM permissions;
 
--- Assign permissions to Manager role (20 permissions)
+-- Assign permissions to manager role
 INSERT INTO role_permissions (role_id, permission_id, is_default)
 SELECT 
     (SELECT id FROM roles WHERE code = 'manager'),
     id,
     TRUE
 FROM permissions
-WHERE code IN (
-    'view_dashboard',
-    'view_materials', 'create_materials', 'edit_materials', 'export_materials',
-    'view_categories', 'create_categories', 'edit_categories',
-    'view_suppliers', 'create_suppliers', 'edit_suppliers',
-    'view_stock_in', 'create_stock_in', 'edit_stock_in',
-    'view_stock_out', 'create_stock_out', 'edit_stock_out',
-    'view_stock_adjustments', 'create_stock_adjustments',
-    'view_reports', 'export_reports', 'view_low_stock'
-);
+WHERE code IN ('view_dashboard', 'view_materials', 'create_materials', 'edit_materials', 
+               'view_stock', 'stock_in', 'stock_out', 'stock_adjustment', 
+               'view_reports', 'manage_suppliers', 'manage_categories');
 
--- Assign permissions to Staff role (9 permissions)
+-- Assign permissions to staff role
 INSERT INTO role_permissions (role_id, permission_id, is_default)
 SELECT 
     (SELECT id FROM roles WHERE code = 'staff'),
     id,
     TRUE
 FROM permissions
-WHERE code IN (
-    'view_dashboard',
-    'view_materials',
-    'view_categories',
-    'view_suppliers',
-    'view_stock_in', 'create_stock_in',
-    'view_stock_out', 'create_stock_out',
-    'view_low_stock'
-);
+WHERE code IN ('view_dashboard', 'view_materials', 'view_stock', 'stock_in', 'stock_out');
 
 -- Create default admin user
 -- Password: admin123

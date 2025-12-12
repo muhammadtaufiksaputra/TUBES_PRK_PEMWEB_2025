@@ -39,54 +39,6 @@ class AuthApiController extends Controller
     }
 
     /**
-     * Register via API
-     */
-    public function register()
-    {
-        // Get JSON input
-        $input = json_decode(file_get_contents('php://input'), true);
-
-        // Validate input
-        $validator = Validator::make($input, [
-            'name' => 'required|min:3|max:100',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6'
-        ]);
-
-        if (!$validator->validate()) {
-            Response::validationError($validator->errors());
-        }
-
-        try {
-            $validated = $validator->validated();
-
-            // Create user
-            $userModel = new User();
-            $userId = $userModel->create([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => $validated['password'],
-                'is_active' => true
-            ]);
-
-            // Assign default role
-            $roleModel = new Role();
-            $defaultRole = $roleModel->findByCode('staff');
-            
-            if ($defaultRole) {
-                $userModel->assignRole($userId, $defaultRole['id'], true);
-            }
-
-            Response::created('Registrasi berhasil.', [
-                'user_id' => $userId
-            ]);
-
-        } catch (Exception $e) {
-            Response::error('Terjadi kesalahan saat registrasi.', [], 500);
-        }
-    }
-
-    /**
      * Logout via API
      */
     public function logout()

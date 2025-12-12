@@ -54,6 +54,7 @@
                     <th class="px-6 py-4">Kategori</th>
                     <th class="px-6 py-4">Stok</th>
                     <th class="px-6 py-4">Min. Stok</th>
+                    <th class="px-6 py-4">Supplier</th>
                     <th class="px-6 py-4">Status</th>
                     <th class="px-6 py-4">Aksi</th>
                 </tr>
@@ -103,6 +104,15 @@
                         <option value="">Pilih Kategori</option>
                     </select>
                     <p id="category_idError" class="hidden text-sm text-red-500 mt-1"></p>
+                </div>
+
+                <!-- Supplier -->
+                <div>
+                    <label for="supplierId" class="block text-sm font-medium text-slate-700 mb-2">Supplier Default</label>
+                    <select id="supplierId" name="default_supplier_id" class="w-full rounded-lg border border-slate-200 px-4 py-2.5 focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all">
+                        <option value="">Pilih Supplier</option>
+                    </select>
+                    <p id="default_supplier_idError" class="hidden text-sm text-red-500 mt-1"></p>
                 </div>
 
                 <!-- Satuan -->

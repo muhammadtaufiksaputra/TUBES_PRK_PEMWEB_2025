@@ -95,6 +95,16 @@ class StockIn extends Model
             $params[] = '%' . $filters['reference_number'] . '%';
         }
 
+        // Search filter (searches in reference_number, material name, supplier name)
+        if (!empty($filters['search'])) {
+            $where[] = '(si.reference_number LIKE ? OR m.name LIKE ? OR m.code LIKE ? OR s.name LIKE ?)';
+            $searchParam = '%' . $filters['search'] . '%';
+            $params[] = $searchParam;
+            $params[] = $searchParam;
+            $params[] = $searchParam;
+            $params[] = $searchParam;
+        }
+
         $whereClause = implode(' AND ', $where);
         $params[] = $perPage;
         $params[] = $offset;
@@ -129,36 +139,58 @@ class StockIn extends Model
     {
         $where = ['1=1'];
         $params = [];
+        $searchJoin = false;
         $dateColumn = $this->getDateColumnName();
 
         if (!empty($filters['material_id'])) {
-            $where[] = 'material_id = ?';
+            $where[] = 'si.material_id = ?';
             $params[] = $filters['material_id'];
         }
 
         if (!empty($filters['supplier_id'])) {
-            $where[] = 'supplier_id = ?';
+            $where[] = 'si.supplier_id = ?';
             $params[] = $filters['supplier_id'];
         }
 
         if (!empty($filters['date_from'])) {
-            $where[] = "DATE({$dateColumn}) >= ?";
+            $where[] = "DATE(si.{$dateColumn}) >= ?";
             $params[] = $filters['date_from'];
         }
 
         if (!empty($filters['date_to'])) {
-            $where[] = "DATE({$dateColumn}) <= ?";
+            $where[] = "DATE(si.{$dateColumn}) <= ?";
             $params[] = $filters['date_to'];
         }
 
         if (!empty($filters['reference_number'])) {
-            $where[] = 'reference_number LIKE ?';
+            $where[] = 'si.reference_number LIKE ?';
             $params[] = '%' . $filters['reference_number'] . '%';
+        }
+
+        // Search filter needs JOIN for material and supplier names
+        if (!empty($filters['search'])) {
+            $searchJoin = true;
+            $where[] = '(si.reference_number LIKE ? OR m.name LIKE ? OR m.code LIKE ? OR s.name LIKE ?)';
+            $searchParam = '%' . $filters['search'] . '%';
+            $params[] = $searchParam;
+            $params[] = $searchParam;
+            $params[] = $searchParam;
+            $params[] = $searchParam;
         }
 
         $whereClause = implode(' AND ', $where);
 
-        $sql = "SELECT COUNT(*) as total FROM {$this->table} WHERE {$whereClause}";
+        // Use JOIN if search is used
+        if ($searchJoin) {
+            $sql = "SELECT COUNT(*) as total 
+                    FROM {$this->table} si
+                    LEFT JOIN materials m ON si.material_id = m.id
+                    LEFT JOIN suppliers s ON si.supplier_id = s.id
+                    WHERE {$whereClause}";
+        } else {
+            $sql = "SELECT COUNT(*) as total FROM {$this->table} si WHERE {$whereClause}";
+        }
+
         $stmt = $this->query($sql, $params);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result['total'] ?? 0;
@@ -209,6 +241,7 @@ class StockIn extends Model
         $dateColumnName = $this->getDateColumnName();
 
         $columns = [
+            'reference_number',
             'material_id',
             'supplier_id',
             'quantity',
@@ -217,6 +250,7 @@ class StockIn extends Model
         ];
         $placeholders = array_fill(0, count($columns), '?');
         $values = [
+            $data['reference_number'],
             $data['material_id'],
             $data['supplier_id'],
             $data['quantity'],
@@ -229,6 +263,11 @@ class StockIn extends Model
             $placeholders[] = '?';
             $values[] = $data['transaction_date'];
         }
+
+        // Map notes/invoice_number to actual 'note' column
+        $columns[] = 'note';
+        $placeholders[] = '?';
+        $values[] = $data['notes'] ?? $data['invoice_number'] ?? null;
 
         $columns[] = 'created_by';
         $placeholders[] = '?';
@@ -623,6 +662,8 @@ class StockIn extends Model
                     si.quantity,
                     si.unit_price,
                     si.{$dateColumn} as txn_date,
+                    si.reference_number,
+                    si.note,
                     m.name as material_name,
                     m.unit,
                     s.name as supplier_name

@@ -52,11 +52,14 @@ class StockAdjustment
             // insert adjustment record
             $ins = $this->db->prepare("
                 INSERT INTO stock_adjustments
-                (material_id, reason, adjustment_date, created_by)
-                VALUES (:material_id, :reason, CURDATE(), :created_by)
+                (material_id, old_stock, new_stock, difference, reason, adjustment_date, created_by)
+                VALUES (:material_id, :old_stock, :new_stock, :difference, :reason, CURDATE(), :created_by)
             ");
             $ins->execute([
                 ':material_id' => (int)$data['material_id'],
+                ':old_stock' => $oldStock,
+                ':new_stock' => $newStock,
+                ':difference' => $difference,
                 ':reason' => $data['reason'],
                 ':created_by' => (int)$data['created_by']
             ]);
@@ -151,12 +154,12 @@ class StockAdjustment
             $params[':reason'] = $filters['reason'];
         }
         if (!empty($filters['start_date'])) {
-            $where[] = "sa.adjusted_at >= :start_date";
-            $params[':start_date'] = $filters['start_date'] . ' 00:00:00';
+            $where[] = "sa.adjustment_date >= :start_date";
+            $params[':start_date'] = $filters['start_date'];
         }
         if (!empty($filters['end_date'])) {
-            $where[] = "sa.adjusted_at <= :end_date";
-            $params[':end_date'] = $filters['end_date'] . ' 23:59:59';
+            $where[] = "sa.adjustment_date <= :end_date";
+            $params[':end_date'] = $filters['end_date'];
         }
         if (!empty($filters['q'])) {
             $where[] = "(sa.notes LIKE :q OR u.name LIKE :q)";
@@ -170,12 +173,12 @@ class StockAdjustment
         $countStmt->execute($params);
         $total = (int)$countStmt->fetchColumn();
 
-        $sql = "SELECT sa.*, m.name as material_name, u.name as adjusted_by_name
+        $sql = "SELECT sa.*, m.name as material_name, m.code as material_code, u.name as adjusted_by_name
                 FROM stock_adjustments sa
                 LEFT JOIN materials m ON m.id = sa.material_id
                 LEFT JOIN users u ON u.id = sa.created_by
                 $whereSql
-                ORDER BY sa.created_at DESC
+                ORDER BY sa.adjustment_date DESC, sa.created_at DESC
                 LIMIT :offset, :perPage";
 
         $stmt = $this->db->prepare($sql);

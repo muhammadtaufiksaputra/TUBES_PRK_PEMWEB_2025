@@ -23,10 +23,11 @@ class SupplierApiController extends Controller
 
             $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
             $perPage = isset($_GET['per_page']) ? min(100, intval($_GET['per_page'])) : 10;
+            $search = $_GET['search'] ?? '';
 
             $supplier = new Supplier();
-            $suppliers = $supplier->getAllActive($page, $perPage);
-            $total = $supplier->countActive();
+            $suppliers = $supplier->getAllActive($page, $perPage, $search);
+            $total = $supplier->countActive($search);
             $lastPage = ceil($total / $perPage);
 
             // Format: Match category response format for consistent AJAX handling

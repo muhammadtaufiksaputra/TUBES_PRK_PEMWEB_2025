@@ -13,27 +13,44 @@ class Category extends Model
     protected $primaryKey = 'id';
 
     /**
-     * Get all categories with pagination
+     * Get all categories with pagination and search
      */
-    public function getAll($page = 1, $perPage = 20)
+    public function getAll($page = 1, $perPage = 20, $search = '')
     {
         $offset = ($page - 1) * $perPage;
         
-        $sql = "SELECT * FROM {$this->table} 
-                ORDER BY name ASC 
-                LIMIT ? OFFSET ?";
+        $sql = "SELECT * FROM {$this->table}";
+        $params = [];
         
-        $stmt = $this->query($sql, [$perPage, $offset]);
+        if (!empty($search)) {
+            $sql .= " WHERE (name LIKE ? OR description LIKE ?)";
+            $searchParam = '%' . $search . '%';
+            $params = [$searchParam, $searchParam];
+        }
+        
+        $sql .= " ORDER BY name ASC LIMIT ? OFFSET ?";
+        $params[] = $perPage;
+        $params[] = $offset;
+        
+        $stmt = $this->query($sql, $params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
-     * Get count of all categories
+     * Get count of all categories with search
      */
-    public function countAll()
+    public function countAll($search = '')
     {
         $sql = "SELECT COUNT(*) as total FROM {$this->table}";
-        $stmt = $this->query($sql);
+        $params = [];
+        
+        if (!empty($search)) {
+            $sql .= " WHERE (name LIKE ? OR description LIKE ?)";
+            $searchParam = '%' . $search . '%';
+            $params = [$searchParam, $searchParam];
+        }
+        
+        $stmt = $this->query($sql, $params);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result['total'] ?? 0;
     }
