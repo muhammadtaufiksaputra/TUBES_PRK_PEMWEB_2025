@@ -73,15 +73,15 @@ class DashboardController extends Controller
         // Stock in this month
         $stmt = $db->query("SELECT COUNT(*) as total, COALESCE(SUM(quantity), 0) as total_qty 
                            FROM stock_in 
-                           WHERE MONTH(created_at) = MONTH(CURRENT_DATE()) 
-                           AND YEAR(created_at) = YEAR(CURRENT_DATE())");
+                           WHERE MONTH(txn_date) = MONTH(CURRENT_DATE()) 
+                           AND YEAR(txn_date) = YEAR(CURRENT_DATE())");
         $stockInThisMonth = $stmt->fetch();
         
         // Stock out this month
         $stmt = $db->query("SELECT COUNT(*) as total, COALESCE(SUM(quantity), 0) as total_qty 
                            FROM stock_out 
-                           WHERE MONTH(created_at) = MONTH(CURRENT_DATE()) 
-                           AND YEAR(created_at) = YEAR(CURRENT_DATE())");
+                           WHERE MONTH(txn_date) = MONTH(CURRENT_DATE()) 
+                           AND YEAR(txn_date) = YEAR(CURRENT_DATE())");
         $stockOutThisMonth = $stmt->fetch();
         
         // Low stock count

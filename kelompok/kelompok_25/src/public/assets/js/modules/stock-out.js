@@ -13,8 +13,7 @@ const StockOutModule = {
             material_id: '',
             usage_type: '',
             start_date: '',
-            end_date: '',
-            search: ''
+            end_date: ''
         }
     },
 
@@ -57,12 +56,6 @@ const StockOutModule = {
 
         document.getElementById('filterEndDate')?.addEventListener('change', () => {
             this.applyFilters();
-        });
-
-        document.getElementById('searchInput')?.addEventListener('input', (e) => {
-            this.state.filters.search = e.target.value;
-            clearTimeout(this.searchTimeout);
-            this.searchTimeout = setTimeout(() => this.applyFilters(), 500);
         });
 
         // Material change handler
@@ -229,7 +222,7 @@ const StockOutModule = {
         if (this.state.stockOuts.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="4" class="text-center">Tidak ada data stock out</td>
+                    <td colspan="8" class="text-center">Tidak ada data stock out</td>
                 </tr>
             `;
             return;
@@ -239,18 +232,16 @@ const StockOutModule = {
             const no = (this.state.currentPage - 1) * 20 + index + 1;
             
             return `
-                <tr class="border-b border-slate-100 hover:bg-slate-50">
-                    <td class="py-4 px-4 text-slate-600">${no}</td>
-                    <td class="py-4 px-4">
-                        <div class="font-medium text-slate-900">${so.material_name || '-'}</div>
-                        ${so.material_code ? `<div class="text-xs text-slate-500 mt-1">${so.material_code}</div>` : ''}
-                    </td>
-                    <td class="py-4 px-4 text-right">
-                        <span class="font-semibold text-slate-900">${parseFloat(so.quantity || 0).toFixed(2)}</span>
-                    </td>
-                    <td class="py-4 px-4">
-                        <div class="text-slate-900">${new Date(so.transaction_date).toLocaleDateString('id-ID')}</div>
-                        <div class="text-xs text-slate-500 mt-1">oleh: ${so.created_by_name || '-'}</div>
+                <tr>
+                    <td>${no}</td>
+                    <td><code>${so.reference_number || '-'}</code></td>
+                    <td>${so.material_code ? so.material_code + '<br>' : ''}${so.material_name || '-'}</td>
+                    <td class="text-end"><strong>${parseFloat(so.quantity || 0).toFixed(2)}</strong></td>
+                    <td><span class="badge bg-primary">${this.getUsageTypeLabel(so.usage_type)}</span></td>
+                    <td>${so.destination || '-'}</td>
+                    <td>
+                        <small>${new Date(so.transaction_date).toLocaleDateString('id-ID')}</small><br>
+                        <small class="text-muted">oleh: ${so.created_by_name || '-'}</small>
                     </td>
                 </tr>
             `;

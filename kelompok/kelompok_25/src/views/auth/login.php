@@ -80,25 +80,6 @@
                     <?php endif; ?>
                 </div>
 
-                <!-- Remember Me and Forgot Password Component -->
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <input 
-                            type="checkbox" 
-                            id="remember" 
-                            name="remember" 
-                            value="1"
-                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        >
-                        <label for="remember" class="ml-2 block text-sm text-gray-700">
-                            Ingat saya
-                        </label>
-                    </div>
-                    <a href="<?= url('/forgot-password') ?>" class="text-sm text-blue-600 hover:text-blue-700">
-                        Lupa Password?
-                    </a>
-                </div>
-
                 <!-- Submit Button Component -->
                 <button 
                     type="submit" 
@@ -112,15 +93,6 @@
                 </button>
             </form>
 
-            <!-- Register Link Component -->
-            <div class="mt-6 text-center">
-                <p class="text-gray-600">
-                    Belum punya akun?
-                    <a href="<?= url('/register') ?>" class="text-blue-600 hover:text-blue-700 font-medium">
-                        Daftar sekarang
-                    </a>
-                </p>
-            </div>
         </div>
 
         <!-- Footer Component -->

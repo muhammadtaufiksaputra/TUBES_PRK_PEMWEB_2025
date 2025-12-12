@@ -40,6 +40,7 @@ class StockOutApiController extends Controller
 
             $filters = [
                 'material_id' => isset($_GET['material_id']) ? (int)$_GET['material_id'] : null,
+                'usage_type' => $_GET['usage_type'] ?? null,
                 'start_date' => $_GET['start_date'] ?? null,
                 'end_date' => $_GET['end_date'] ?? null,
                 'q' => $_GET['q'] ?? null
@@ -99,6 +100,7 @@ class StockOutApiController extends Controller
             $payload = [
                 'material_id' => isset($input['material_id']) ? (int)$input['material_id'] : null,
                 'quantity' => isset($input['quantity']) ? (float)$input['quantity'] : null,
+                'usage_type' => $input['usage_type'] ?? null,
                 'transaction_date' => $input['transaction_date'] ?? date('Y-m-d'),
                 'destination' => $input['destination'] ?? null,
                 'notes' => $input['notes'] ?? null,
@@ -109,7 +111,7 @@ class StockOutApiController extends Controller
 
             // Log activity
             $this->logActivity('CREATE', 'stock_out', $stockOut['id'], 
-                "Created stock out for material ID {$input['material_id']}");
+                "Created stock out {$stockOut['reference_number']} for material ID {$input['material_id']}");
 
             Response::created('Stock out berhasil dibuat', $stockOut);
 

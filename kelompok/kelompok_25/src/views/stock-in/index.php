@@ -58,7 +58,6 @@
                         <th class="text-right">Harga/Unit</th>
                         <th class="text-right">Total</th>
                         <th class="text-left">Batch</th>
-                        <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="text-slate-700" id="stockInTableBody">

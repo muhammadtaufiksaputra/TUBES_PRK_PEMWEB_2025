@@ -34,13 +34,14 @@ class CategoryApiController extends Controller
             // Get pagination parameters
             $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
             $perPage = isset($_GET['per_page']) ? (int)$_GET['per_page'] : 20;
+            $search = $_GET['search'] ?? '';
 
             // Validate pagination
             if ($page < 1) $page = 1;
             if ($perPage < 1 || $perPage > 100) $perPage = 20;
 
             // Get data
-            $categories = $this->categoryModel->getAll($page, $perPage);
+            $categories = $this->categoryModel->getAll($page, $perPage, $search);
             
             // Add material count to each category
             foreach ($categories as &$category) {
@@ -48,7 +49,7 @@ class CategoryApiController extends Controller
             }
             unset($category);
             
-            $total = $this->categoryModel->countAll();
+            $total = $this->categoryModel->countAll($search);
             $totalPages = ceil($total / $perPage);
 
             Response::success('Data kategori berhasil diambil', [

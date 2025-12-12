@@ -114,6 +114,28 @@ class MaterialApiController extends Controller
                 $material['stock_status'] = 'Habis';
             }
 
+            // Format supplier as nested object
+            if ($material['supplier_name']) {
+                $material['supplier'] = [
+                    'id' => $material['supplier_id'],
+                    'name' => $material['supplier_name'],
+                    'contact_person' => $material['supplier_contact_person'],
+                    'phone' => $material['supplier_phone'],
+                    'email' => $material['supplier_email'],
+                    'address' => $material['supplier_address']
+                ];
+            } else {
+                $material['supplier'] = null;
+            }
+
+            // Remove flat supplier fields
+            unset($material['supplier_id']);
+            unset($material['supplier_name']);
+            unset($material['supplier_contact_person']);
+            unset($material['supplier_phone']);
+            unset($material['supplier_email']);
+            unset($material['supplier_address']);
+
             Response::success('Detail material berhasil diambil', [
                 'data' => $material
             ]);
@@ -205,6 +227,7 @@ class MaterialApiController extends Controller
                 'unit' => 'required|max:50',
                 'min_stock' => 'required|numeric|min:0',
                 'code' => 'max:50',
+                'default_supplier_id' => 'numeric',
                 'current_stock' => 'numeric|min:0'
             ]);
 
@@ -263,6 +286,7 @@ class MaterialApiController extends Controller
                 'unit' => 'max:50',
                 'min_stock' => 'numeric|min:0',
                 'code' => 'max:50',
+                'default_supplier_id' => 'numeric',
                 'current_stock' => 'numeric|min:0'
             ]);
 

@@ -117,6 +117,9 @@ class LowStockApiController extends Controller
                         m.current_stock,
                         m.min_stock,
                         c.name as category_name,
+                        s.name as supplier_name,
+                        s.phone as supplier_phone,
+                        s.email as supplier_email,
                         COALESCE(
                             (SELECT unit_price FROM stock_in WHERE material_id = m.id ORDER BY created_at DESC LIMIT 1),
                             0
@@ -127,6 +130,7 @@ class LowStockApiController extends Controller
                         ) as last_stock_in_date
                     FROM materials m
                     LEFT JOIN categories c ON m.category_id = c.id
+                    LEFT JOIN suppliers s ON m.default_supplier_id = s.id
                     WHERE m.is_active = 1 AND m.current_stock = 0
                     ORDER BY m.name ASC";
 
@@ -161,6 +165,8 @@ class LowStockApiController extends Controller
                         (m.min_stock - m.current_stock) as min_reorder_qty,
                         (m.min_stock * 2 - m.current_stock) as suggested_reorder_qty,
                         c.name as category_name,
+                        s.name as supplier_name,
+                        s.phone as supplier_phone,
                         COALESCE(
                             (SELECT unit_price FROM stock_in WHERE material_id = m.id ORDER BY created_at DESC LIMIT 1),
                             0
@@ -171,6 +177,7 @@ class LowStockApiController extends Controller
                         ) as estimated_cost
                     FROM materials m
                     LEFT JOIN categories c ON m.category_id = c.id
+                    LEFT JOIN suppliers s ON m.default_supplier_id = s.id
                     WHERE m.is_active = 1 
                     AND m.current_stock <= m.min_stock
                     ORDER BY 

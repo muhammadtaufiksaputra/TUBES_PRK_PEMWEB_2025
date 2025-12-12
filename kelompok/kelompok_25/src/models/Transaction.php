@@ -90,38 +90,61 @@ class Transaction extends Model {
     }
 
     public function getSummary($startDate = null, $endDate = null) {
-        $where = "1=1";
-        $params = [];
+        $whereStockIn = "1=1";
+        $whereStockOut = "1=1";
+        $whereAdjustments = "1=1";
+        $paramsStockIn = [];
+        $paramsStockOut = [];
+        $paramsAdjustments = [];
         
         if ($startDate) {
-            $where .= " AND txn_date >= ?";
-            $params[] = $startDate;
+            $whereStockIn .= " AND txn_date >= ?";
+            $paramsStockIn[] = $startDate;
+            
+            $whereStockOut .= " AND txn_date >= ?";
+            $paramsStockOut[] = $startDate;
+            
+            $whereAdjustments .= " AND adjustment_date >= ?";
+            $paramsAdjustments[] = $startDate;
         }
         if ($endDate) {
-            $where .= " AND txn_date <= ?";
-            $params[] = $endDate;
+            $whereStockIn .= " AND txn_date <= ?";
+            $paramsStockIn[] = $endDate;
+            
+            $whereStockOut .= " AND txn_date <= ?";
+            $paramsStockOut[] = $endDate;
+            
+            $whereAdjustments .= " AND adjustment_date <= ?";
+            $paramsAdjustments[] = $endDate;
         }
         
-        $stmt = $this->db->prepare(
-            "SELECT 
-                (SELECT COUNT(*) FROM stock_in WHERE $where) +
-                (SELECT COUNT(*) FROM stock_out WHERE $where) +
-                (SELECT COUNT(*) FROM stock_adjustments WHERE adjustment_date >= ? AND adjustment_date <= ?) as total"
-        );
-        $stmt->execute(array_merge($params, [$startDate ?: '1970-01-01', $endDate ?: '9999-12-31']));
-        $totalTransactions = $stmt->fetch()['total'] ?? 0;
+        // Count total stock in
+        $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM stock_in WHERE $whereStockIn");
+        $stmt->execute($paramsStockIn);
+        $countStockIn = $stmt->fetch()['total'] ?? 0;
         
-        $stmt = $this->db->prepare("SELECT COALESCE(SUM(total_price), 0) as total FROM stock_in WHERE $where");
-        $stmt->execute($params);
+        // Count total stock out
+        $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM stock_out WHERE $whereStockOut");
+        $stmt->execute($paramsStockOut);
+        $countStockOut = $stmt->fetch()['total'] ?? 0;
+        
+        // Count total adjustments
+        $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM stock_adjustments WHERE $whereAdjustments");
+        $stmt->execute($paramsAdjustments);
+        $totalAdjustments = $stmt->fetch()['total'] ?? 0;
+        
+        // Total all transactions
+        $totalTransactions = $countStockIn + $countStockOut + $totalAdjustments;
+        
+        // Sum total price from stock in
+        $stmt = $this->db->prepare("SELECT COALESCE(SUM(total_price), 0) as total FROM stock_in WHERE $whereStockIn");
+        $stmt->execute($paramsStockIn);
         $totalStockIn = $stmt->fetch()['total'] ?? 0;
         
-        $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM stock_out WHERE $where");
-        $stmt->execute($params);
+        // Count stock out
+        $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM stock_out WHERE $whereStockOut");
+        $stmt->execute($paramsStockOut);
         $totalStockOut = $stmt->fetch()['total'] ?? 0;
-        
-        $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM stock_adjustments WHERE adjustment_date >= ? AND adjustment_date <= ?");
-        $stmt->execute([$startDate ?: '1970-01-01', $endDate ?: '9999-12-31']);
-        $totalAdjustments = $stmt->fetch()['total'] ?? 0;
         
         return [
             'total_transactions' => $totalTransactions,

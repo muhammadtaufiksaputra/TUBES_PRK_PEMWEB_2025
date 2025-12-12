@@ -8,8 +8,6 @@
 $router->get('/', 'web/AuthController@showLogin');
 $router->get('/login', 'web/AuthController@showLogin');
 $router->post('/login', 'web/AuthController@login');
-$router->get('/register', 'web/AuthController@showRegister');
-$router->post('/register', 'web/AuthController@register');
 $router->get('/forgot-password', 'web/AuthController@showForgotPassword');
 $router->post('/forgot-password', 'web/AuthController@forgotPassword');
 
