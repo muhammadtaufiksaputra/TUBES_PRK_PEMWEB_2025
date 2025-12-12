@@ -1,5 +1,11 @@
 # Inventory Manager – Kelompok 25
 
+# Daftar Anggota Kelompok
+- M. Sidiq Firdaus
+- Muhammad Taufik Saputra
+- Rima Dwi Puspitasari
+- Agnes Anggraini
+
 Dashboard stok bahan baku berbasis PHP native dengan arsitektur MVC ringan. Frontend memakai Tailwind CSS, sedangkan backend menggunakan router kustom, controller, dan model PDO. Projek ini disiapkan agar tim BE dan FE dapat bekerja paralel: tampilan bisa dikembangkan lebih dulu, sementara integrasi data tetap mengikuti struktur controller/model yang sudah ada.
 
 ## Teknologi Utama
